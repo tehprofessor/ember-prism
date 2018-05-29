@@ -8,24 +8,27 @@ module.exports = {
     // Defaults that can be overriden by options
     this.components = [];
     this.plugins = [];
-    this.theme = 'themes/prism.css';
+    this.theme = 'node_modules/prismjs/themes/prism.css';
 
     let app = findHost(this);
 
     if (app.options && app.options['ember-prism']) {
       const options = app.options['ember-prism'];
-      const components = options.components;
       const plugins = options.plugins;
       const theme = options.theme;
 
-      if (theme && theme !== 'none') {
-        this.theme = `themes/prism-${theme}.css`;
+      if (options.components) {
+        if (typeof FastBoot !== 'undefined') {
+          this.components = options.components;
+        } else {
+          this.components = options.components.map((component) => {
+            return `node_modules/prismjs/components/prism-${component}.js`;
+          });
+        }
       }
 
-      if (components) {
-        components.forEach((component) => {
-          this.components.push(`components/prism-${component}.js`);
-        });
+      if (theme && theme !== 'none') {
+        this.theme = `node_modules/prismjs/themes/prism-${theme}.css`;
       }
 
       if (plugins) {
@@ -49,7 +52,7 @@ module.exports = {
 
 
             if (fs.existsSync(file)) {
-              this.plugins.push(nodeAssetsPath);
+              this.plugins.push(file);
             }
           });
 
@@ -58,18 +61,25 @@ module.exports = {
     }
 
     this._super.included.apply(this, arguments);
-  },
-  options: {
-    nodeAssets: {
-      prismjs() {
-        return {
-          import: [
-            'prism.js',
-            this.theme
-          ].concat(this.components, this.plugins)
-        };
-      }
+
+    if (typeof FastBoot !== 'undefined') {
+      // Fastboot
+      const Prism = require('prismjs');
+      const loadLanguages = require('prismjs/components/index.js');
+      loadLanguages(this.components);
+    } else {
+      // Browser
+      this.import('node_modules/prismjs/prism.js');
+      this.components.forEach((component) => {
+        this.import(component);
+      });
     }
+
+    this.plugins.forEach((plugin) => {
+      this.import(plugin);
+    });
+
+    this.import(this.theme);
   }
 };
 

@@ -31,10 +31,9 @@
     "test:all": "ember try:each"
   },
   "dependencies": {
-    "ember-cli-babel": "^6.8.2",
+    "ember-cli-babel": "^6.6.0",
     "ember-cli-htmlbars": "^2.0.3",
-    "ember-cli-node-assets": "^0.2.2",
-    "prismjs": "^1.8.3"
+    "prismjs": "^1.14.0"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
